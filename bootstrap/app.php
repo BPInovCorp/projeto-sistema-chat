@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\EnsureUtilizadorAdmin;
+use App\Http\Middleware\EnsureUtilizadorAtivo;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,7 +14,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'ativo' => EnsureUtilizadorAtivo::class,
+            'admin' => EnsureUtilizadorAdmin::class,
+        ]);
+
+        $middleware->appendToGroup('web', [
+            EnsureUtilizadorAtivo::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

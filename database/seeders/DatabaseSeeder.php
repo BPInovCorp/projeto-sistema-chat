@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Enums\EstadoUtilizador;
+use App\Enums\PermissaoUtilizador;
+use App\Models\Sala;
+use App\Models\Utilizador;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -10,16 +13,59 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $admin = Utilizador::updateOrCreate(
+            ['email' => env('ADMIN_EMAIL', 'admin@inovcorp.pt')],
+            [
+                'nome' => 'Bruno Pinto',
+                'password' => env('ADMIN_PASSWORD', 'adminpassword123'),
+                'permissao' => PermissaoUtilizador::ADMIN,
+                'estado' => EstadoUtilizador::ATIVO,
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $userNormal = Utilizador::updateOrCreate(
+            ['email' => 'user@inovcorp.pt'],
+            [
+                'nome' => 'User Normal',
+                'password' => 'userpassword123',
+                'permissao' => PermissaoUtilizador::UTILIZADOR,
+                'estado' => EstadoUtilizador::ATIVO,
+            ]
+        );
+
+        Utilizador::updateOrCreate(
+            ['email' => 'inativo@inovcorp.pt'],
+            [
+                'nome' => 'User Inativo',
+                'password' => 'inativopassword123',
+                'permissao' => PermissaoUtilizador::UTILIZADOR,
+                'estado' => EstadoUtilizador::INATIVO,
+            ]
+        );
+
+        $salaGeral = Sala::updateOrCreate(
+            ['nome' => 'Geral'],
+            [
+                'utilizador_id' => $admin->id,
+            ]
+        );
+
+        $salaGeral->utilizadores()->syncWithoutDetaching([
+            $admin->id,
+            $userNormal->id,
+        ]);
+
+        $salaProjetos = Sala::updateOrCreate(
+            ['nome' => 'Projetos'],
+            [
+                'utilizador_id' => $admin->id,
+            ]
+        );
+
+        $salaProjetos->utilizadores()->syncWithoutDetaching([
+            $admin->id,
         ]);
     }
 }
