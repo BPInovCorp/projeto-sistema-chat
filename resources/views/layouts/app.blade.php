@@ -8,13 +8,27 @@
 </head>
 <body class="min-h-screen bg-base-200 text-base-content antialiased flex flex-col">
     <header class="navbar bg-base-100 border-b border-base-300 px-4 md:px-8 shrink-0">
-        <div class="flex-1">
+        <div class="flex-1 flex items-center gap-2">
             <a href="{{ route('salas.index') }}" class="btn btn-ghost text-sm font-bold tracking-tight gap-2 px-2">
                 <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-neutral text-neutral-content font-semibold text-xs">
                     IC
                 </span>
                 <span>Inovcorp Chat</span>
             </a>
+
+            <div class="hidden sm:flex items-center gap-1 ml-4 border-l border-base-300 pl-4">
+                <a href="{{ route('salas.index') }}" class="btn btn-ghost btn-xs text-xs font-medium {{ request()->routeIs('salas.*') ? 'btn-active' : '' }}">
+                    Salas
+                </a>
+                <a href="{{ route('conversas-diretas.index') }}" class="btn btn-ghost btn-xs text-xs font-medium {{ request()->routeIs('conversas-diretas.*') ? 'btn-active' : '' }}">
+                    Mensagens Diretas
+                </a>
+                @can('viewAny', App\Models\Utilizador::class)
+                    <a href="{{ route('admin.utilizadores.index') }}" class="btn btn-ghost btn-xs text-xs font-medium {{ request()->routeIs('admin.*') ? 'btn-active' : '' }}">
+                        Colaboradores
+                    </a>
+                @endcan
+            </div>
         </div>
 
         <div class="flex-none flex items-center gap-3">

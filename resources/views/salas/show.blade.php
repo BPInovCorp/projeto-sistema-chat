@@ -59,10 +59,16 @@
                         $souEu = $mensagem->utilizador_id === auth()->id();
                     @endphp
                     <div class="chat {{ $souEu ? 'chat-end' : 'chat-start' }}">
-                        <div class="chat-image avatar placeholder">
-                            <div class="w-8 h-8 rounded-full text-xs font-semibold {{ $souEu ? 'bg-primary text-primary-content' : 'bg-neutral text-neutral-content' }}">
-                                <span>{{ mb_strtoupper(mb_substr($mensagem->utilizador->nome, 0, 2, 'UTF-8'), 'UTF-8') }}</span>
-                            </div>
+                        <div class="chat-image avatar {{ $mensagem->utilizador->avatar ? '' : 'placeholder' }}">
+                            @if ($mensagem->utilizador->avatar)
+                                <div class="w-8 h-8 rounded-full">
+                                    <img src="{{ asset('storage/' . $mensagem->utilizador->avatar) }}" alt="{{ $mensagem->utilizador->nome }}" class="object-cover" />
+                                </div>
+                            @else
+                                <div class="w-8 h-8 rounded-full text-xs font-semibold flex items-center justify-center {{ $souEu ? 'bg-primary text-primary-content' : 'bg-neutral text-neutral-content' }}">
+                                    <span>{{ mb_strtoupper(mb_substr($mensagem->utilizador->nome, 0, 2, 'UTF-8'), 'UTF-8') }}</span>
+                                </div>
+                            @endif
                         </div>
                         <div class="chat-header text-[11px] text-base-content/60 mb-1 flex items-center gap-1.5">
                             <span class="font-semibold text-base-content/80">{{ $mensagem->utilizador->nome }}</span>
@@ -124,11 +130,19 @@
                 @foreach ($sala->utilizadores as $membro)
                     <div class="flex items-center justify-between p-2 rounded-lg bg-base-200/50 text-xs">
                         <div class="flex items-center gap-2">
-                            <div class="avatar placeholder">
-                                <div class="bg-neutral text-neutral-content rounded-full w-6 h-6 text-[10px] font-bold">
-                                    <span>{{ mb_strtoupper(mb_substr($membro->nome, 0, 2, 'UTF-8'), 'UTF-8') }}</span>
+                            @if ($membro->avatar)
+                                <div class="avatar">
+                                    <div class="w-6 h-6 rounded-full">
+                                        <img src="{{ asset('storage/' . $membro->avatar) }}" alt="{{ $membro->nome }}" class="object-cover" />
+                                    </div>
                                 </div>
-                            </div>
+                            @else
+                                <div class="avatar placeholder">
+                                    <div class="bg-neutral text-neutral-content rounded-full w-6 h-6 text-[10px] font-bold flex items-center justify-center">
+                                        <span>{{ mb_strtoupper(mb_substr($membro->nome, 0, 2, 'UTF-8'), 'UTF-8') }}</span>
+                                    </div>
+                                </div>
+                            @endif
                             <div>
                                 <span class="font-semibold block">{{ $membro->nome }}</span>
                                 <span class="text-[10px] text-base-content/60">
