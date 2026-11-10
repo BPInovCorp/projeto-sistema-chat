@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\EstadoUtilizador;
 use App\Models\ConversaDireta;
+use App\Models\Sala;
 use App\Models\Utilizador;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -51,10 +52,21 @@ class ConversaDiretaController extends Controller
             ->cronologico()
             ->get();
 
+        $todasSalas = $request->user()->salas()->withCount('utilizadores')->latest('updated_at')->get();
+
+        $minhasConversas = ConversaDireta::where('utilizador_um_id', $request->user()->id)
+            ->orWhere('utilizador_dois_id', $request->user()->id)
+            ->with(['primeiroUtilizador', 'segundoUtilizador'])
+            ->latest('updated_at')
+            ->take(8)
+            ->get();
+
         return view('conversas-diretas.show', [
             'conversa' => $conversa,
             'parceiro' => $parceiro,
             'mensagens' => $mensagens,
+            'todasSalas' => $todasSalas,
+            'minhasConversas' => $minhasConversas,
         ]);
     }
 }

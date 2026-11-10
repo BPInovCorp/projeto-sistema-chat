@@ -33,24 +33,24 @@
 
         <div class="flex-none flex items-center gap-3">
             <div class="flex items-center gap-2">
-                    @if (auth()->user()->avatar)
-                        <div class="avatar" aria-label="Avatar de {{ auth()->user()->nome }}">
-                            <div class="w-8 h-8 rounded-full">
-                                <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->nome }}" class="object-cover" />
-                            </div>
+                @if (auth()->user()->avatar)
+                    <div class="avatar" aria-label="Avatar de {{ auth()->user()->nome }}">
+                        <div class="w-8 h-8 rounded-full overflow-hidden">
+                            <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->nome }}" class="w-full h-full object-cover" />
                         </div>
-                    @else
-                        <div class="avatar placeholder" aria-label="Avatar de {{ auth()->user()->nome }}">
-                            <div class="bg-neutral text-neutral-content rounded-full w-8 h-8 text-xs font-semibold flex items-center justify-center">
-                                <span>{{ mb_strtoupper(mb_substr(auth()->user()->nome, 0, 2, 'UTF-8'), 'UTF-8') }}</span>
-                            </div>
-                        </div>
-                    @endif
-                    <div class="hidden sm:flex flex-col text-left">
-                        <span class="text-xs font-semibold leading-tight">{{ auth()->user()->nome }}</span>
-                        <span class="text-[10px] text-base-content/60 leading-tight">{{ auth()->user()->permissao?->label() }}</span>
                     </div>
+                @else
+                    <div class="avatar placeholder" aria-label="Avatar de {{ auth()->user()->nome }}">
+                        <div class="bg-neutral text-neutral-content rounded-full w-8 h-8 font-bold text-xs flex items-center justify-center">
+                            <span>{{ mb_strtoupper(mb_substr(auth()->user()->nome, 0, 2, 'UTF-8'), 'UTF-8') }}</span>
+                        </div>
+                    </div>
+                @endif
+                <div class="hidden sm:flex flex-col text-left">
+                    <span class="text-xs font-semibold leading-tight">{{ auth()->user()->nome }}</span>
+                    <span class="text-[10px] text-base-content/60 leading-tight">{{ auth()->user()->permissao?->label() }}</span>
                 </div>
+            </div>
 
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
@@ -83,7 +83,7 @@
         </div>
     @endif
 
-    <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6">
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col min-h-0">
         @yield('conteudo')
     </main>
 </body>

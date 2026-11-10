@@ -31,4 +31,14 @@ class SalaPolicy
     {
         return $utilizador->isAdmin();
     }
+
+    public function update(Utilizador $utilizador, Sala $sala): bool
+    {
+        return $utilizador->isAdmin();
+    }
+
+    public function delete(Utilizador $utilizador, Sala $sala): bool
+    {
+        return $utilizador->isAdmin();
+    }
 }

@@ -43,7 +43,7 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended('/');
+        return redirect()->intended(route('salas.index'));
     }
 
     public function destroy(Request $request): RedirectResponse

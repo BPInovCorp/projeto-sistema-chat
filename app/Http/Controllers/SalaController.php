@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\EstadoUtilizador;
+use App\Models\ConversaDireta;
 use App\Models\Sala;
 use App\Models\Utilizador;
 use Illuminate\Http\RedirectResponse;
@@ -91,10 +92,87 @@ class SalaController extends Controller
                 ->get();
         }
 
+        $todasSalas = $request->user()->salas()->withCount('utilizadores')->latest('updated_at')->get();
+
+        $minhasConversas = ConversaDireta::where('utilizador_um_id', $request->user()->id)
+            ->orWhere('utilizador_dois_id', $request->user()->id)
+            ->with(['primeiroUtilizador', 'segundoUtilizador'])
+            ->latest('updated_at')
+            ->take(8)
+            ->get();
+
         return view('salas.show', [
             'sala' => $sala,
             'mensagens' => $sala->mensagens,
             'utilizadoresDisponiveis' => $utilizadoresDisponiveis,
+            'todasSalas' => $todasSalas,
+            'minhasConversas' => $minhasConversas,
         ]);
+    }
+
+    public function edit(Sala $sala): View
+    {
+        Gate::authorize('update', $sala);
+
+        return view('salas.edit', [
+            'sala' => $sala,
+        ]);
+    }
+
+    public function update(Request $request, Sala $sala): RedirectResponse
+    {
+        Gate::authorize('update', $sala);
+
+        $dados = $request->validate([
+            'nome' => ['required', 'string', 'max:255'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+        ]);
+
+        $novoAvatar = null;
+        $avatarAntigo = $sala->avatar;
+
+        if ($request->hasFile('avatar')) {
+            $novoAvatar = $request->file('avatar')->store('salas', 'public');
+        }
+
+        try {
+            DB::transaction(function () use ($sala, $dados, $novoAvatar, $avatarAntigo) {
+                $sala->update([
+                    'nome' => trim($dados['nome']),
+                    'avatar' => $novoAvatar ?? $avatarAntigo,
+                ]);
+            });
+
+            if ($novoAvatar && $avatarAntigo && Storage::disk('public')->exists($avatarAntigo)) {
+                Storage::disk('public')->delete($avatarAntigo);
+            }
+        } catch (Throwable $e) {
+            if ($novoAvatar && Storage::disk('public')->exists($novoAvatar)) {
+                Storage::disk('public')->delete($novoAvatar);
+            }
+
+            throw $e;
+        }
+
+        return redirect()->route('salas.show', $sala)->with('sucesso', 'Sala atualizada com sucesso.');
+    }
+
+    public function destroy(Sala $sala): RedirectResponse
+    {
+        Gate::authorize('delete', $sala);
+
+        $caminhoAvatar = $sala->avatar;
+
+        DB::transaction(function () use ($sala) {
+            $sala->mensagens()->delete();
+            $sala->utilizadores()->detach();
+            $sala->delete();
+        });
+
+        if ($caminhoAvatar && Storage::disk('public')->exists($caminhoAvatar)) {
+            Storage::disk('public')->delete($caminhoAvatar);
+        }
+
+        return redirect()->route('salas.index')->with('sucesso', 'Sala eliminada com sucesso.');
     }
 }

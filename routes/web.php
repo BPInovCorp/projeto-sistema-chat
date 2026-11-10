@@ -6,10 +6,17 @@ use App\Http\Controllers\ConversaDiretaController;
 use App\Http\Controllers\MensagemController;
 use App\Http\Controllers\SalaController;
 use App\Http\Controllers\SalaMembroController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
-    Route::get('/', function () {
+    Route::get('/', function (Request $request) {
+        $primeiraSala = $request->user()->salas()->oldest('id')->first();
+
+        if ($primeiraSala) {
+            return redirect()->route('salas.show', $primeiraSala);
+        }
+
         return redirect()->route('salas.index');
     });
 
@@ -17,6 +24,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/salas/criar', [SalaController::class, 'create'])->name('salas.create');
     Route::post('/salas', [SalaController::class, 'store'])->name('salas.store');
     Route::get('/salas/{sala}', [SalaController::class, 'show'])->name('salas.show');
+    Route::get('/salas/{sala}/editar', [SalaController::class, 'edit'])->name('salas.edit');
+    Route::put('/salas/{sala}', [SalaController::class, 'update'])->name('salas.update');
+    Route::delete('/salas/{sala}', [SalaController::class, 'destroy'])->name('salas.destroy');
 
     Route::post('/salas/{sala}/membros', [SalaMembroController::class, 'store'])->name('salas.membros.store');
     Route::delete('/salas/{sala}/membros/{utilizador}', [SalaMembroController::class, 'destroy'])->name('salas.membros.destroy');
